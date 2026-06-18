@@ -1,0 +1,23 @@
+<nav class="topnav">
+  <button class="sidebar-toggle-btn" type="button" aria-label="Toggle navigation">
+    <i class="bi bi-list"></i>
+  </button>
+
+  <div class="topnav-title">
+    <h1 class="page-title" id="pageTitle">Dashboard</h1>
+    <span class="page-org" id="navOrgName">Youth Lions Society</span>
+  </div>
+
+  <div class="topnav-actions">
+    <span class="topnav-date" id="navCurrentDate"></span>
+    <div class="topnav-avatar" title="Admin">A</div>
+  </div>
+</nav>
+<script>
+  (function () {
+    const dateEl = document.getElementById('navCurrentDate');
+    if (dateEl) {
+      dateEl.textContent = new Date().toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+    }
+  })();
+</script>
