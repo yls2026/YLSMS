@@ -12,17 +12,16 @@ let editingId = null;
 document.addEventListener('DOMContentLoaded', initMembersPage);
 
 async function initMembersPage() {
-  document.getElementById('pageTitle').textContent = 'Members';
+  setTimeout(async () => {
+    const pageTitle = document.getElementById('pageTitle');
+    if (pageTitle) {
+      pageTitle.textContent = 'Members';
+    }
 
-  wireFilterEvents();
-  wireFormEvents();
-  await loadMembers();
-
-  // Auto-open the add modal if linked from a quick action.
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('action') === 'add') {
-    openAddModal();
-  }
+    wireFilterEvents();
+    wireFormEvents();
+    await loadMembers();
+  }, 200);
 }
 
 async function loadMembers() {
