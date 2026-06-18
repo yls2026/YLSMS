@@ -193,6 +193,8 @@ function openAddModal() {
 }
 
 function openEditModal(id) {
+  const phone = member.Phone || '';
+  const whatsapp = member.WhatsApp || '';
   const member = allMembers.find(m => m.ID === id);
   if (!member) return;
   editingId = id;
@@ -208,9 +210,12 @@ function openEditModal(id) {
   document.getElementById('fieldGender').value = member.Gender || '';
   document.getElementById('fieldEmail').value = member.Email || '';
   document.getElementById('fieldAddress').value = member.Address || '';
-  document.getElementById('fieldPhone').value = member.Phone || '';
-  document.getElementById('fieldWhatsApp').value = member.WhatsApp || '';
-  document.getElementById('sameAsPhone').checked = member.Phone === member.WhatsApp;
+
+  document.getElementById('fieldPhone').value =
+    phone.replace(/^\+\d{1,4}/, '');
+
+  document.getElementById('fieldWhatsApp').value =
+    whatsapp.replace(/^\+\d{1,4}/, ''); document.getElementById('sameAsPhone').checked = member.Phone === member.WhatsApp;
 
   new bootstrap.Modal(document.getElementById('memberModal')).show();
 }
@@ -249,6 +254,13 @@ function clearAllFieldErrors() {
 
 function wireFormEvents() {
   const countryCodeSelect = document.getElementById('fieldCountryCode');
+
+  if (countryCodeSelect) {
+    countryCodeSelect.addEventListener('change', function () {
+      document.getElementById('phoneCode').textContent = this.value;
+      document.getElementById('whatsappCode').textContent = this.value;
+    });
+  }
 
   countryCodeSelect.addEventListener('change', function () {
     document.getElementById('phoneCode').textContent = this.value;
@@ -316,17 +328,25 @@ async function handleMemberSubmit(e) {
     Address: document.getElementById('fieldAddress').value.trim(),
     Email: document.getElementById('fieldEmail').value.trim(),
 
-    Phone:
-      countryCode +
-      document.getElementById('fieldPhone').value.replace(/^0+/, ''),
+    Phone: document.getElementById('fieldPhone').value.startsWith('+')
+      ? document.getElementById('fieldPhone').value
+      : countryCode + document.getElementById('fieldPhone').value.replace(/^0+/, ''),
 
-    WhatsApp:
-      countryCode +
-      (
+    WhatsApp: (
+      document.getElementById('fieldWhatsApp').value ||
+      document.getElementById('fieldPhone').value
+    ).startsWith('+')
+      ? (
+        document.getElementById('fieldWhatsApp').value ||
+        document.getElementById('fieldPhone').value
+      )
+      : countryCode + (
         document.getElementById('fieldWhatsApp').value ||
         document.getElementById('fieldPhone').value
       ).replace(/^0+/, '')
   };
+
+  console.log('DATA TO SAVE:', data);
 
 
 
