@@ -87,9 +87,6 @@ async function initLayout(basePath) {
   initSidebarToggle();
   setNavbarOrgName();
   showDemoBanner();
-<<<<<<< HEAD
   wireAuthUI();
   applyAuthUI();
-=======
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
 }

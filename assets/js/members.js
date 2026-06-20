@@ -12,7 +12,6 @@ let editingId = null;
 document.addEventListener('DOMContentLoaded', initMembersPage);
 
 async function initMembersPage() {
-<<<<<<< HEAD
   setTimeout(async () => {
     const pageTitle = document.getElementById('pageTitle');
     if (pageTitle) {
@@ -31,26 +30,6 @@ async function initMembersPage() {
 window.addEventListener('ylsms:authchanged', () => {
   if (document.getElementById('membersBody')) renderTable();
 });
-=======
-  document.getElementById('pageTitle').textContent = 'Members';
-
-  populateCountryCodeSelects();
-  wireFilterEvents();
-  wireFormEvents();
-  await loadMembers();
-
-  // Auto-open the add modal if linked from a quick action.
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('action') === 'add') {
-    openAddModal();
-  }
-}
-
-function populateCountryCodeSelects() {
-  document.getElementById('fieldPhoneCode').innerHTML = countryCodeOptionsHtml('94');
-  document.getElementById('fieldWhatsAppCode').innerHTML = countryCodeOptionsHtml('94');
-}
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
 
 async function loadMembers() {
   try {
@@ -153,15 +132,10 @@ function renderTable() {
       <td>${escapeHtml(m.Phone)}</td>
       <td>${escapeHtml(m.WhatsApp)}</td>
       <td class="text-end">
-<<<<<<< HEAD
         ${isAdmin() ? `
         <button class="btn btn-icon btn-outline-primary me-1" title="Edit" onclick="openEditModal('${escapeHtml(m.ID)}')"><i class="bi bi-pencil-fill"></i></button>
         <button class="btn btn-icon btn-outline-danger" title="Delete" onclick="openDeleteModal('${escapeHtml(m.ID)}')"><i class="bi bi-trash3-fill"></i></button>
         ` : `<span class="text-muted small"><i class="bi bi-eye"></i> View only</span>`}
-=======
-        <button class="btn btn-icon btn-outline-primary me-1" title="Edit" onclick="openEditModal('${escapeHtml(m.ID)}')"><i class="bi bi-pencil-fill"></i></button>
-        <button class="btn btn-icon btn-outline-danger" title="Delete" onclick="openDeleteModal('${escapeHtml(m.ID)}')"><i class="bi bi-trash3-fill"></i></button>
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
       </td>
     </tr>`).join('');
 
@@ -216,34 +190,22 @@ function nextSuggestedId() {
 }
 
 function openAddModal() {
-<<<<<<< HEAD
   if (!isAdmin()) { showToast('Please log in as Admin to add members.', 'warning'); return; }
-=======
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
   editingId = null;
   document.getElementById('memberModalLabel').innerHTML = '<i class="bi bi-person-plus-fill me-2"></i>Add Member';
   document.getElementById('memberForm').reset();
   document.getElementById('fieldId').value = nextSuggestedId();
   document.getElementById('fieldId').removeAttribute('readonly');
-<<<<<<< HEAD
   document.getElementById('sameAsPhone').checked = true;
   populateCountryCodeSelect(document.getElementById('fieldPhoneCode'), '+94');
   populateCountryCodeSelect(document.getElementById('fieldWhatsAppCode'), '+94');
-=======
-  document.getElementById('fieldPhoneCode').value = '94';
-  document.getElementById('fieldWhatsAppCode').value = '94';
-  document.getElementById('sameAsPhone').checked = true;
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
   clearAlert(document.getElementById('formAlert'));
   clearAllFieldErrors();
   new bootstrap.Modal(document.getElementById('memberModal')).show();
 }
 
 function openEditModal(id) {
-<<<<<<< HEAD
   if (!isAdmin()) { showToast('Please log in as Admin to edit members.', 'warning'); return; }
-=======
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
   const member = allMembers.find(m => m.ID === id);
   if (!member) return;
   editingId = id;
@@ -259,7 +221,6 @@ function openEditModal(id) {
   document.getElementById('fieldGender').value = member.Gender || '';
   document.getElementById('fieldEmail').value = member.Email || '';
   document.getElementById('fieldAddress').value = member.Address || '';
-<<<<<<< HEAD
 
   const phoneSplit = splitPhoneByCountryCode(member.Phone);
   populateCountryCodeSelect(document.getElementById('fieldPhoneCode'), phoneSplit.code);
@@ -269,24 +230,13 @@ function openEditModal(id) {
   populateCountryCodeSelect(document.getElementById('fieldWhatsAppCode'), whatsappSplit.code);
   document.getElementById('fieldWhatsApp').value = whatsappSplit.number;
 
-=======
-  const phoneParts = splitPhoneNumber(member.Phone);
-  const waParts = splitPhoneNumber(member.WhatsApp);
-  document.getElementById('fieldPhoneCode').value = phoneParts.code;
-  document.getElementById('fieldPhone').value = phoneParts.number;
-  document.getElementById('fieldWhatsAppCode').value = waParts.code;
-  document.getElementById('fieldWhatsApp').value = waParts.number;
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
   document.getElementById('sameAsPhone').checked = member.Phone === member.WhatsApp;
 
   new bootstrap.Modal(document.getElementById('memberModal')).show();
 }
 
 function openDeleteModal(id) {
-<<<<<<< HEAD
   if (!isAdmin()) { showToast('Please log in as Admin to delete members.', 'warning'); return; }
-=======
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
   const member = allMembers.find(m => m.ID === id);
   if (!member) return;
   document.getElementById('deleteMemberName').textContent = `${member.Name} (${member.ID})`;
@@ -318,19 +268,10 @@ function clearAllFieldErrors() {
 // FORM EVENTS / VALIDATION / SUBMIT
 // ---------------------------------------------------------------------------
 
-<<<<<<< HEAD
-=======
-function syncWhatsAppWithPhone() {
-  document.getElementById('fieldWhatsAppCode').value = document.getElementById('fieldPhoneCode').value;
-  document.getElementById('fieldWhatsApp').value = document.getElementById('fieldPhone').value;
-}
-
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
 function wireFormEvents() {
   document.getElementById('btnAddMember').addEventListener('click', openAddModal);
 
   document.getElementById('sameAsPhone').addEventListener('change', e => {
-<<<<<<< HEAD
     if (e.target.checked) {
       document.getElementById('fieldWhatsApp').value = document.getElementById('fieldPhone').value;
       document.getElementById('fieldWhatsAppCode').value = document.getElementById('fieldPhoneCode').value;
@@ -345,25 +286,12 @@ function wireFormEvents() {
     if (document.getElementById('sameAsPhone').checked) {
       document.getElementById('fieldWhatsAppCode').value = e.target.value;
     }
-=======
-    if (e.target.checked) syncWhatsAppWithPhone();
-  });
-  document.getElementById('fieldPhone').addEventListener('input', () => {
-    if (document.getElementById('sameAsPhone').checked) syncWhatsAppWithPhone();
-  });
-  document.getElementById('fieldPhoneCode').addEventListener('change', () => {
-    if (document.getElementById('sameAsPhone').checked) syncWhatsAppWithPhone();
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
   });
 
   document.getElementById('memberForm').addEventListener('submit', handleMemberSubmit);
 }
 
-<<<<<<< HEAD
 function validateMemberForm(data) {
-=======
-function validateMemberForm(data, phoneNumber, whatsappNumber) {
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
   clearAllFieldErrors();
   let valid = true;
 
@@ -383,11 +311,7 @@ function validateMemberForm(data, phoneNumber, whatsappNumber) {
     setFieldError(document.getElementById('fieldBirthday'), 'Birthday is required.');
     valid = false;
   }
-<<<<<<< HEAD
   if (!isValidPhone(data.Phone)) {
-=======
-  if (!isValidPhone(phoneNumber)) {
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
     setFieldError(document.getElementById('fieldPhone'), 'Enter a valid phone number.');
     valid = false;
   }
@@ -400,17 +324,10 @@ function validateMemberForm(data, phoneNumber, whatsappNumber) {
 
 async function handleMemberSubmit(e) {
   e.preventDefault();
-<<<<<<< HEAD
   if (!isAdmin()) {
     showAlert(document.getElementById('formAlert'), 'Please log in as Admin to save changes.');
     return;
   }
-=======
-
-  const phoneNumber = document.getElementById('fieldPhone').value.trim();
-  const whatsappNumber = document.getElementById('fieldWhatsApp').value.trim() || phoneNumber;
-  const whatsappCode = document.getElementById('fieldWhatsAppCode').value;
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
 
   const data = {
     ID: document.getElementById('fieldId').value.trim(),
@@ -420,7 +337,6 @@ async function handleMemberSubmit(e) {
     Gender: document.getElementById('fieldGender').value,
     Address: document.getElementById('fieldAddress').value.trim(),
     Email: document.getElementById('fieldEmail').value.trim(),
-<<<<<<< HEAD
     Phone: formatPhoneInput(document.getElementById('fieldPhoneCode').value, document.getElementById('fieldPhone').value),
     WhatsApp: formatPhoneInput(
       document.getElementById('fieldWhatsAppCode').value,
@@ -429,13 +345,6 @@ async function handleMemberSubmit(e) {
   };
 
   if (!validateMemberForm(data)) {
-=======
-    Phone: formatPhoneWithCode(document.getElementById('fieldPhoneCode').value, phoneNumber),
-    WhatsApp: formatPhoneWithCode(whatsappCode, whatsappNumber)
-  };
-
-  if (!validateMemberForm(data, phoneNumber, whatsappNumber)) {
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
     showAlert(document.getElementById('formAlert'), 'Please fix the highlighted fields before saving.');
     return;
   }

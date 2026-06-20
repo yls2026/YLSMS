@@ -60,7 +60,6 @@ const Api = (() => {
     return prefix + String(max + 1).padStart(3, '0');
   }
 
-<<<<<<< HEAD
   function normalizePhone(phone) {
     if (!phone) return '';
     const str = String(phone).trim();
@@ -72,12 +71,6 @@ const Api = (() => {
     if (digits.startsWith('94')) return '+' + digits;
     if (digits.startsWith('0')) digits = digits.substring(1);
     return '+94' + digits;
-=======
-  function cleanPhone(phone) {
-    if (!phone) return '';
-    const raw = String(phone).trim();
-    return raw.startsWith('+') ? '+' + raw.replace(/[^\d]/g, '') : raw;
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
   }
 
   // -------------------------------------------------------------------
@@ -95,18 +88,11 @@ const Api = (() => {
   async function apiPost(action, data) {
     // Sent as text/plain to avoid a CORS preflight (Apps Script can't
     // respond to OPTIONS requests), the backend still parses it as JSON.
-<<<<<<< HEAD
     const token = (typeof getAdminToken === 'function') ? getAdminToken() : '';
     const res = await fetch(CONFIG.API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action, data, token })
-=======
-    const res = await fetch(CONFIG.API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, data })
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
     });
     const json = await res.json();
     if (!json.success) throw new Error(json.error || 'Request failed');
@@ -125,11 +111,7 @@ const Api = (() => {
   async function addMember(member) {
     if (CONFIG.DEMO_MODE) {
       const id = member.ID && member.ID.trim() ? member.ID : generateDemoId();
-<<<<<<< HEAD
       const record = { ...member, ID: id, Phone: normalizePhone(member.Phone), WhatsApp: normalizePhone(member.WhatsApp || member.Phone) };
-=======
-      const record = { ...member, ID: id, Phone: cleanPhone(member.Phone), WhatsApp: cleanPhone(member.WhatsApp || member.Phone) };
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
       demoMembers.push(record);
       demoAttendance.push({ ID: id, Name: member.Name, ...blankMonthObject(false) });
       demoFees.push({ ID: id, Name: member.Name, ...blankMonthObject('Pending') });
@@ -142,11 +124,7 @@ const Api = (() => {
     if (CONFIG.DEMO_MODE) {
       const idx = demoMembers.findIndex(m => m.ID === member.ID);
       if (idx === -1) throw new Error('Member not found');
-<<<<<<< HEAD
       demoMembers[idx] = { ...demoMembers[idx], ...member, Phone: normalizePhone(member.Phone), WhatsApp: normalizePhone(member.WhatsApp || member.Phone) };
-=======
-      demoMembers[idx] = { ...demoMembers[idx], ...member, Phone: cleanPhone(member.Phone), WhatsApp: cleanPhone(member.WhatsApp || member.Phone) };
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
       const att = demoAttendance.find(a => a.ID === member.ID);
       if (att) att.Name = member.Name;
       const fee = demoFees.find(f => f.ID === member.ID);
@@ -222,7 +200,6 @@ const Api = (() => {
     return apiPost('saveSettings', settings);
   }
 
-<<<<<<< HEAD
   // -------------------------------------------------------------------
   // PUBLIC API — ADMIN LOGIN
   // -------------------------------------------------------------------
@@ -246,17 +223,12 @@ const Api = (() => {
     return apiPost('changeAdminPassword', { newPassword });
   }
 
-=======
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
   return {
     fetchMembers, addMember, updateMember, deleteMember,
     fetchAttendance, saveAttendance,
     fetchFees, saveFees,
     fetchSettings, saveSettings,
-<<<<<<< HEAD
     adminLogin, adminLogout, changeAdminPassword,
-=======
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
     MONTHS
   };
 })();

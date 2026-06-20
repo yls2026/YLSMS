@@ -188,7 +188,6 @@ a { text-decoration: none; }
   display: flex;
   align-items: center;
   gap: 0.7rem;
-<<<<<<< HEAD
   width: 100%;
   background: transparent;
   border: none;
@@ -198,9 +197,6 @@ a { text-decoration: none; }
   border-radius: var(--radius-md, 10px);
 }
 .sidebar-admin-chip:hover { background: rgba(255, 255, 255, 0.06); }
-=======
-}
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
 
 .sidebar-admin-avatar {
   width: 36px;
@@ -530,7 +526,6 @@ select.fee-select.is-pending { background: var(--danger-bg); color: var(--danger
   padding: 0.5rem 1rem;
 }
 
-<<<<<<< HEAD
 .guest-banner {
   background: rgba(106, 26, 33, 0.07);
   color: var(--primary);
@@ -547,8 +542,6 @@ select.fee-select.is-pending { background: var(--danger-bg); color: var(--danger
   flex: 0 0 auto;
 }
 
-=======
->>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
 .fade-in { animation: fadeIn 0.3s ease; }
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
