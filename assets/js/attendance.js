@@ -16,10 +16,13 @@ async function initAttendancePage() {
   await loadAttendance();
 }
 
+<<<<<<< HEAD
 window.addEventListener('ylsms:authchanged', () => {
   if (document.getElementById('attendanceBody')) renderAttendanceTable();
 });
 
+=======
+>>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
 async function loadAttendance() {
   try {
     attendanceRows = await Api.fetchAttendance();
@@ -54,7 +57,11 @@ function renderAttendanceTable() {
     const rate = Math.round((presentCount / 12) * 100);
     const monthCells = MONTHS_FULL.map(m => `
       <td class="text-center">
+<<<<<<< HEAD
         <input type="checkbox" class="attendance-checkbox" ${isPresent(r[m]) ? 'checked' : ''} ${isAdmin() ? '' : 'disabled'}
+=======
+        <input type="checkbox" class="attendance-checkbox" ${isPresent(r[m]) ? 'checked' : ''}
+>>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
           onchange="toggleAttendance('${escapeHtml(r.ID)}', '${m}', this.checked, this)">
       </td>`).join('');
 
@@ -69,11 +76,14 @@ function renderAttendanceTable() {
 }
 
 async function toggleAttendance(id, month, checked, checkboxEl) {
+<<<<<<< HEAD
   if (!isAdmin()) {
     checkboxEl.checked = !checked;
     showToast('Please log in as Admin to mark attendance.', 'warning');
     return;
   }
+=======
+>>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
   const statusEl = document.getElementById('attendanceSaveStatus');
   checkboxEl.disabled = true;
   try {

@@ -9,7 +9,11 @@
  * only in memory, so every page works for preview purposes immediately.
  */
 const CONFIG = {
+<<<<<<< HEAD
   API_URL: 'https://script.google.com/macros/s/AKfycbx1kCrw2BD3-e3BtLwGZ1SZaoB1ohBv70yealeHMY4qAj2NiFhgpK0fRDRhmf2DXfzQ/exec',
+=======
+  API_URL: 'https://script.google.com/macros/s/AKfycby0RPLv0d14ZAlagREJvwnelJ9GX0iTVOP2yIOogIBrFDWc0ptjnl1gdLTzohyYKnwR/exec',
+>>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
   ORG_NAME_FALLBACK: 'Youth Lions Society',
   DEMO_MODE: true // automatically set to false once API_URL is a real URL
 };

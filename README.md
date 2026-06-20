@@ -2,21 +2,33 @@
 
 A complete, free-to-run admin dashboard for managing a Youth Lions Society — members, attendance, membership fees, birthdays, and reports. Built with plain HTML5, CSS3 and JavaScript (Bootstrap 5) on the frontend, and Google Apps Script + Google Sheets as a free backend/database. Designed to be hosted on GitHub Pages at no cost.
 
+<<<<<<< HEAD
 There are two access levels: anyone can **view** members, attendance, fees and birthdays without logging in, while a single shared **Admin password** is required to add, edit, delete, or mark anything.
+=======
+There is only one role: **Admin**.
+>>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
 
 ---
 
 ## 1. Features
 
 - Responsive dashboard with summary cards (total/male/female members, upcoming birthdays, attendance rate, fee collection rate)
+<<<<<<< HEAD
 - **Public view / Admin edit:** anyone can browse members, member numbers, attendance and fee records, and birthdays without logging in. Adding, editing, deleting, or marking attendance/fees requires logging in as Admin (see §4a below).
 - Members module: add/edit/delete, auto-generated `YLS/YYYY/001` IDs, search, filter, sort, pagination
 - **Configurable phone country codes:** the Add/Edit Member form has a country-code dropdown (defaults to 🇱🇰 +94 Sri Lanka) instead of a fixed prefix — add or remove countries in `assets/js/countryCodes.js`
+=======
+- Members module: add/edit/delete, auto-generated `YLS/YYYY/001` IDs, search, filter, sort, pagination
+>>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
 - Attendance register: a Jan–Dec checkbox grid per member with instant auto-save
 - Membership fees tracker: a Jan–Dec Paid/Pending dropdown grid per member with instant auto-save and monthly statistics
 - Birthday tracking with automatic age calculation and "today's birthday" highlighting
 - Reports module: Member, Attendance, Fee Collection and Birthday reports, each exportable as PDF, Excel, or CSV
+<<<<<<< HEAD
 - Settings page for organization name, WhatsApp group link, fee amount, system theme, and the Admin password (Admin-only)
+=======
+- Settings page for organization name, WhatsApp group link, fee amount, and system theme
+>>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
 - Works fully in **demo mode** out of the box (sample data, no backend needed) so you can preview every screen immediately
 
 ---
@@ -30,11 +42,17 @@ There are two access levels: anyone can **view** members, attendance, fees and b
 │   ├── css/style.css           → theme, layout, components
 │   ├── js/
 │   │   ├── config.js           → API URL + demo mode toggle
+<<<<<<< HEAD
 │   │   ├── auth.js             → Admin login/logout, session token, view-vs-edit UI gating
 │   │   ├── countryCodes.js     → list of country calling codes for the phone fields
 │   │   ├── api.js              → API layer (talks to Apps Script / demo data)
 │   │   ├── utils.js             → shared helpers (toasts, validation, dates)
 │   │   ├── components.js       → loads sidebar/navbar, mobile nav, wires admin login UI
+=======
+│   │   ├── api.js              → API layer (talks to Apps Script / demo data)
+│   │   ├── utils.js             → shared helpers (toasts, validation, dates)
+│   │   ├── components.js       → loads sidebar/navbar, mobile nav
+>>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
 │   │   ├── dashboard.js / members.js / attendance.js / fees.js / reports.js / settings.js
 │   ├── icons/                  → put a favicon/logo here
 │   └── images/                 → put screenshots/images here
@@ -64,6 +82,7 @@ To go live with your own data, follow the steps below.
 
 ---
 
+<<<<<<< HEAD
 ## 4a. Admin Login & Public View
 
 YLSMS has no per-person user accounts — there's a single shared **Admin password** for the whole club.
@@ -77,6 +96,8 @@ YLSMS has no per-person user accounts — there's a single shared **Admin passwo
 
 ---
 
+=======
+>>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
 ## 4. Google Sheets Setup
 
 1. Go to [sheets.google.com](https://sheets.google.com) and create a new, blank spreadsheet. Name it e.g. **"YLSMS Database"**.
@@ -171,6 +192,7 @@ Each page under `/pages/` loads `components/sidebar.html` and `components/navbar
 **I want to change the color theme.**
 Go to **Settings → System Theme** for the three built-in options, or edit the CSS variables at the top of `assets/css/style.css` for full custom control.
 
+<<<<<<< HEAD
 **"Unauthorized. Please log in as Admin" when saving.**
 Your login session expired (sessions last ~6 hours) or you're not logged in yet — tap **Admin Login** in the navbar/sidebar and enter the Admin password again.
 
@@ -189,6 +211,8 @@ This password gate is designed for a small club's honor-system needs, not bank-g
 - Treat the Google Sheet itself as the source of truth — only share *edit* access to it with people you trust, since anyone with sheet access can read or change the Admin password directly.
 - This system does not encrypt data in transit beyond standard HTTPS, and does not log who performed which write — it only checks *whether* the caller knows the current password.
 
+=======
+>>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
 ---
 
 ## 11. Tech Stack

@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', initSettingsPage);
 async function initSettingsPage() {
   document.getElementById('pageTitle').textContent = 'Settings';
   document.getElementById('settingsForm').addEventListener('submit', handleSettingsSubmit);
+<<<<<<< HEAD
   document.getElementById('changePasswordForm').addEventListener('submit', handleChangePasswordSubmit);
 
   const demoHint = document.getElementById('demoPasswordHint');
@@ -15,6 +16,8 @@ async function initSettingsPage() {
       ? 'Demo mode: password changes here are not saved — connect a real backend first.'
       : 'Choose a password only your club\'s admins know. You\'ll need it again next time you log in.';
   }
+=======
+>>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
 
   try {
     const settings = await Api.fetchSettings();
@@ -27,6 +30,7 @@ async function initSettingsPage() {
   }
 }
 
+<<<<<<< HEAD
 window.addEventListener('ylsms:authchanged', () => {
   // Nothing to re-render here besides the admin-only/guest-only blocks,
   // which applyAuthUI() already handles.
@@ -68,6 +72,11 @@ async function handleSettingsSubmit(e) {
     showAlert(document.getElementById('settingsAlert'), 'Please log in as Admin to save settings.');
     return;
   }
+=======
+async function handleSettingsSubmit(e) {
+  e.preventDefault();
+  clearAlert(document.getElementById('settingsAlert'));
+>>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
 
   const data = {
     orgName: document.getElementById('orgName').value.trim(),

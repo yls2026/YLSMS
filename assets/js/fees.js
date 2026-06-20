@@ -27,10 +27,13 @@ async function initFeesPage() {
   await loadFees();
 }
 
+<<<<<<< HEAD
 window.addEventListener('ylsms:authchanged', () => {
   if (document.getElementById('feesBody')) renderFeesTable();
 });
 
+=======
+>>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
 async function loadFees() {
   try {
     const [rows, settings] = await Promise.all([Api.fetchFees(), Api.fetchSettings()]);
@@ -92,7 +95,11 @@ function renderFeesTable() {
       const status = r[m] === 'Paid' ? 'Paid' : 'Pending';
       return `
         <td class="text-center">
+<<<<<<< HEAD
           <select class="fee-select ${status === 'Paid' ? 'is-paid' : 'is-pending'}" ${isAdmin() ? '' : 'disabled'}
+=======
+          <select class="fee-select ${status === 'Paid' ? 'is-paid' : 'is-pending'}"
+>>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
             onchange="toggleFee('${escapeHtml(r.ID)}', '${m}', this.value, this)">
             <option value="Paid" ${status === 'Paid' ? 'selected' : ''}>Paid</option>
             <option value="Pending" ${status === 'Pending' ? 'selected' : ''}>Pending</option>
@@ -110,11 +117,14 @@ function renderFeesTable() {
 }
 
 async function toggleFee(id, month, value, selectEl) {
+<<<<<<< HEAD
   if (!isAdmin()) {
     selectEl.value = value === 'Paid' ? 'Pending' : 'Paid';
     showToast('Please log in as Admin to mark fee status.', 'warning');
     return;
   }
+=======
+>>>>>>> 98173020e46fe33fdcc79c03c61100157333c871
   selectEl.disabled = true;
   selectEl.classList.remove('is-paid', 'is-pending');
   try {
