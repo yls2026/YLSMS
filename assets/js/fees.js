@@ -159,7 +159,10 @@ async function toggleFee(id, month, value, selectEl) {
 
 function exportFeesCsv() {
   const header = ['ID', 'Name', ...MONTHS_FULL];
-  const rows = feeRows.map(r => [r.ID, r.Name, ...MONTHS_FULL.map(m => feeStatus(r[m]) === 'Pending' ? 'Not Paid' : feeStatus(r[m]))]);
+  const rows = feeRows.map(r => [r.ID, r.Name, ...MONTHS_FULL.map(m => {
+    const status = feeStatus(r[m]);
+    return status === 'Empty' ? '' : (status === 'Pending' ? 'Not Paid' : status);
+  })]);
   const csv = arrayToCsv([header, ...rows]);
   downloadBlob(csv, `fees-${new Date().getFullYear()}.csv`, 'text/csv');
   showToast('Fee report exported.', 'success');

@@ -47,7 +47,7 @@ function buildFeesDataset() {
   const headers = ['ID', 'Name', ...MONTHS_FULL];
   const rows = reportFees.map(r => [r.ID, r.Name, ...MONTHS_FULL.map(m => {
     if (r[m] === 'Paid') return 'Paid';
-    if (!r[m]) return 'Empty';
+    if (!r[m]) return ''; // genuinely blank — no member fee record for that month yet
     return 'Not Paid';
   })]);
   return { headers, rows };
