@@ -51,6 +51,36 @@ function buildAttendanceDataset() {
   return { headers, rows };
 }
 
+/**
+ * Month-end summary rows for the Attendance PDF: how many members were
+ * Present that month (out of the whole group) and what percentage that
+ * is. Upcoming months show "—" since they haven't happened yet. Used as
+ * the PDF table's footer — not shown in CSV/Excel exports.
+ */
+function buildAttendanceFooterRows() {
+  const curMonth = new Date().getMonth();
+  const totalMembers = reportAttendance.length;
+  const labelStyles = { halign: 'right', fontStyle: 'bold' };
+  const totalRow = [{ content: 'Total Present', colSpan: 2, styles: labelStyles }];
+  const pctRow = [{ content: 'Attendance %', colSpan: 2, styles: labelStyles }];
+
+  MONTHS_FULL.forEach((m, idx) => {
+    if (idx > curMonth) {
+      totalRow.push('—');
+      pctRow.push('—');
+      return;
+    }
+    const count = reportAttendance.filter(r => attendanceStatus(r[m]) === 'Present').length;
+    const pct = totalMembers ? Math.round((count / totalMembers) * 100) : 0;
+    totalRow.push(`${count}/${totalMembers}`);
+    pctRow.push(`${pct}%`);
+  });
+
+  totalRow.push(''); // Rate % column doesn't apply to these summary rows
+  pctRow.push('');
+  return [totalRow, pctRow];
+}
+
 function buildFeesDataset() {
   const headers = ['ID', 'Name', ...MONTHS_FULL];
   const rows = reportFees.map(r => [r.ID, r.Name, ...MONTHS_FULL.map(m => {
@@ -72,7 +102,7 @@ function buildBirthdayDataset() {
 
 const REPORT_BUILDERS = {
   member: { build: buildMemberDataset, title: 'Member Report', filename: 'member-report' },
-  attendance: { build: buildAttendanceDataset, title: 'Attendance Report', filename: 'attendance-report' },
+  attendance: { build: buildAttendanceDataset, title: 'Attendance Report', filename: 'attendance-report', buildFoot: buildAttendanceFooterRows },
   fees: { build: buildFeesDataset, title: 'Fee Collection Report', filename: 'fee-collection-report' },
   birthday: { build: buildBirthdayDataset, title: 'Birthday Report', filename: 'birthday-report' }
 };
@@ -147,9 +177,11 @@ function exportReport(type, format) {
     doc.autoTable({
       head: [headers],
       body: rows,
+      foot: config.buildFoot ? config.buildFoot() : undefined,
       startY: 36,
       styles: { fontSize: 8 },
       headStyles: { fillColor: [106, 26, 33], textColor: [255, 255, 255] },
+      footStyles: { fillColor: [253, 248, 243], textColor: [106, 26, 33], fontStyle: 'bold' },
       alternateRowStyles: { fillColor: [253, 248, 243] },
       didParseCell: (data) => {
         if (data.section !== 'body') return;
