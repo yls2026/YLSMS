@@ -209,6 +209,7 @@ a { text-decoration: none; }
   justify-content: center;
   font-weight: 700;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .sidebar-admin-name { color: #fff; font-size: 0.86rem; font-weight: 600; }
@@ -281,6 +282,13 @@ a { text-decoration: none; }
   align-items: center;
   justify-content: center;
   font-weight: 700;
+  overflow: hidden;
+}
+.topnav-avatar img, .sidebar-admin-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 /* ============================================================================
@@ -564,6 +572,16 @@ select.attendance-select:disabled { cursor: not-allowed; opacity: 0.55; }
 .country-code-select {
   max-width: 150px;
   flex: 0 0 auto;
+}
+
+.year-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.year-nav-label {
+  min-width: 56px;
+  text-align: center;
 }
 
 .fade-in { animation: fadeIn 0.3s ease; }

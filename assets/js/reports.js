@@ -6,6 +6,7 @@ let reportMembers = [];
 let reportAttendance = [];
 let reportFees = [];
 let reportSettings = {};
+let reportActivity = [];
 
 onLayoutReady(initReportsPage);
 
@@ -21,6 +22,24 @@ async function initReportsPage() {
     document.getElementById('countBirthdays').textContent = reportMembers.length;
   } catch (err) {
     showAlert(document.getElementById('reportsAlert'), 'Could not load report data: ' + err.message);
+  }
+  await loadActivityReport();
+}
+
+window.addEventListener('ylsms:authchanged', loadActivityReport);
+
+/** The Activity Log is only visible/fetchable once logged in (the card itself is .admin-only). */
+async function loadActivityReport() {
+  if (!isAdmin()) {
+    reportActivity = [];
+    return;
+  }
+  try {
+    reportActivity = await Api.getActivityLog();
+    const countEl = document.getElementById('countActivity');
+    if (countEl) countEl.textContent = reportActivity.length;
+  } catch (err) {
+    reportActivity = [];
   }
 }
 
@@ -100,11 +119,18 @@ function buildBirthdayDataset() {
   return { headers, rows };
 }
 
+function buildActivityLogDataset() {
+  const headers = ['Timestamp', 'Name', 'Position', 'Action', 'Details'];
+  const rows = reportActivity.map(r => [r.Timestamp, r.DisplayName, r.Position, r.Action, r.Details]);
+  return { headers, rows };
+}
+
 const REPORT_BUILDERS = {
   member: { build: buildMemberDataset, title: 'Member Report', filename: 'member-report' },
   attendance: { build: buildAttendanceDataset, title: 'Attendance Report', filename: 'attendance-report', buildFoot: buildAttendanceFooterRows },
   fees: { build: buildFeesDataset, title: 'Fee Collection Report', filename: 'fee-collection-report' },
-  birthday: { build: buildBirthdayDataset, title: 'Birthday Report', filename: 'birthday-report' }
+  birthday: { build: buildBirthdayDataset, title: 'Birthday Report', filename: 'birthday-report' },
+  activity: { build: buildActivityLogDataset, title: 'Activity Log', filename: 'activity-log' }
 };
 
 // ---------------------------------------------------------------------------

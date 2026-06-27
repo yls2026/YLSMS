@@ -49,6 +49,34 @@ const Api = (() => {
     theme: 'default'
   };
 
+  // year (number) -> { attendance: [...], fees: [...] } — populated by
+  // Api.startNewYear() in demo mode so the year-picker has something to
+  // browse, just like real "Attendance 2026" / "Fees 2026" archive sheets.
+  const demoArchives = {};
+
+  const DEMO_PASSWORD = 'changeme123';
+  const demoUsers = [
+    { username: 'president', displayName: 'Lahiru Sampath', position: 'President', password: DEMO_PASSWORD, photoUrl: '' },
+    { username: 'vice_president', displayName: 'Nipuna Sanjeewa', position: 'Vice President', password: DEMO_PASSWORD, photoUrl: '' },
+    { username: 'secretary', displayName: 'Chandima Ishan', position: 'Secretary', password: DEMO_PASSWORD, photoUrl: '' },
+    { username: 'assistant_secretary', displayName: 'Milan Jeewantha', position: 'Assistant Secretary', password: DEMO_PASSWORD, photoUrl: '' },
+    { username: 'treasurer', displayName: 'Gothama Nandeera', position: 'Treasurer', password: DEMO_PASSWORD, photoUrl: '' },
+    { username: 'media_pr', displayName: 'Kasun Harshana', position: 'Media & Public Relations Officer', password: DEMO_PASSWORD, photoUrl: '' }
+  ];
+  const demoActivityLog = [];
+  const demoTokens = {}; // token -> username
+
+  function demoLog(user, action, details) {
+    demoActivityLog.push({
+      Timestamp: new Date().toLocaleString('en-GB'),
+      Username: user.username,
+      DisplayName: user.displayName,
+      Position: user.position,
+      Action: action,
+      Details: details || ''
+    });
+  }
+
   function generateDemoId() {
     const year = new Date().getFullYear();
     const prefix = `YLS/${year}/`;
@@ -77,9 +105,9 @@ const Api = (() => {
   // LOW LEVEL TRANSPORT (real backend)
   // -------------------------------------------------------------------
 
-  async function apiGet(action) {
-    const url = `${CONFIG.API_URL}?action=${encodeURIComponent(action)}`;
-    const res = await fetch(url, { method: 'GET' });
+  async function apiGet(action, params = {}) {
+    const qs = new URLSearchParams({ action, ...params }).toString();
+    const res = await fetch(`${CONFIG.API_URL}?${qs}`, { method: 'GET' });
     const json = await res.json();
     if (!json.success) throw new Error(json.error || 'Request failed');
     return json.data;
@@ -148,12 +176,21 @@ const Api = (() => {
   }
 
   // -------------------------------------------------------------------
-  // PUBLIC API — ATTENDANCE
+  // PUBLIC API — ATTENDANCE / FEES (year-aware: omit `year` for the
+  // live/current year, pass a past year to read an archived snapshot)
   // -------------------------------------------------------------------
 
-  async function fetchAttendance() {
-    if (CONFIG.DEMO_MODE) return JSON.parse(JSON.stringify(demoAttendance));
-    return apiGet('getAttendance');
+  async function fetchAttendance(year) {
+    const liveYear = new Date().getFullYear();
+    if (CONFIG.DEMO_MODE) {
+      if (year && Number(year) !== liveYear) {
+        const archive = demoArchives[year];
+        if (!archive) throw new Error('No archived Attendance found for ' + year + '.');
+        return JSON.parse(JSON.stringify(archive.attendance));
+      }
+      return JSON.parse(JSON.stringify(demoAttendance));
+    }
+    return apiGet('getAttendance', year ? { year } : {});
   }
 
   async function saveAttendance(id, month, value) {
@@ -165,13 +202,17 @@ const Api = (() => {
     return apiPost('updateAttendance', { id, month, value });
   }
 
-  // -------------------------------------------------------------------
-  // PUBLIC API — FEES
-  // -------------------------------------------------------------------
-
-  async function fetchFees() {
-    if (CONFIG.DEMO_MODE) return JSON.parse(JSON.stringify(demoFees));
-    return apiGet('getFees');
+  async function fetchFees(year) {
+    const liveYear = new Date().getFullYear();
+    if (CONFIG.DEMO_MODE) {
+      if (year && Number(year) !== liveYear) {
+        const archive = demoArchives[year];
+        if (!archive) throw new Error('No archived Fees found for ' + year + '.');
+        return JSON.parse(JSON.stringify(archive.fees));
+      }
+      return JSON.parse(JSON.stringify(demoFees));
+    }
+    return apiGet('getFees', year ? { year } : {});
   }
 
   async function saveFees(id, month, value) {
@@ -181,6 +222,15 @@ const Api = (() => {
       return { id, month, value, saved: true };
     }
     return apiPost('updateFees', { id, month, value });
+  }
+
+  async function listArchivedYears() {
+    const liveYear = new Date().getFullYear();
+    if (CONFIG.DEMO_MODE) {
+      const years = new Set([liveYear, ...Object.keys(demoArchives).map(Number)]);
+      return [...years].sort((a, b) => a - b);
+    }
+    return apiGet('listArchivedYears');
   }
 
   // -------------------------------------------------------------------
@@ -200,44 +250,117 @@ const Api = (() => {
     return apiPost('saveSettings', settings);
   }
 
-  // -------------------------------------------------------------------
-  // PUBLIC API — ADMIN LOGIN
-  // -------------------------------------------------------------------
-
-  /** Resolves with a session token on success, throws on bad password. */
-  async function adminLogin(password) {
-    if (CONFIG.DEMO_MODE) {
-      throw new Error('adminLogin() should not be called directly in demo mode — use loginAdmin() in auth.js.');
-    }
-    const result = await apiPost('adminLogin', { password });
-    return result.token;
-  }
-
-  async function adminLogout(token) {
-    if (CONFIG.DEMO_MODE) return { ok: true };
-    return apiPost('adminLogout', { token });
-  }
-
-  async function changeAdminPassword(newPassword) {
-    if (CONFIG.DEMO_MODE) return { ok: true };
-    return apiPost('changeAdminPassword', { newPassword });
-  }
-
   async function startNewYear(year) {
     if (CONFIG.DEMO_MODE) {
+      const archiveYear = year || new Date().getFullYear();
+      if (demoArchives[archiveYear]) {
+        throw new Error('An archive for ' + archiveYear + ' already exists. (Demo mode keeps this in memory only.)');
+      }
+      demoArchives[archiveYear] = {
+        attendance: JSON.parse(JSON.stringify(demoAttendance)),
+        fees: JSON.parse(JSON.stringify(demoFees))
+      };
       demoAttendance.forEach(r => MONTHS.forEach(m => { r[m] = ''; }));
       demoFees.forEach(r => MONTHS.forEach(m => { r[m] = ''; }));
-      return { ok: true, year };
+      return { ok: true, year: archiveYear };
     }
     return apiPost('startNewYear', { year });
+  }
+
+  // -------------------------------------------------------------------
+  // PUBLIC API — USERS / LOGIN (one account per committee position —
+  // the username always represents the position, never the person)
+  // -------------------------------------------------------------------
+
+  /** Public — no login needed. Used for the "who are you?" picker on the login form. */
+  async function getUsersPublic() {
+    if (CONFIG.DEMO_MODE) {
+      return demoUsers.map(u => ({ username: u.username, displayName: u.displayName, position: u.position, photoUrl: u.photoUrl }));
+    }
+    return apiGet('getUsersPublic');
+  }
+
+  /** Resolves with { token, username, displayName, position, photoUrl } on success, throws on bad credentials. */
+  async function login(username, password) {
+    if (CONFIG.DEMO_MODE) {
+      const user = demoUsers.find(u => u.username === username);
+      if (!user || user.password !== password) throw new Error('Incorrect username or password.');
+      const token = 'demo-token-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+      demoTokens[token] = username;
+      demoLog(user, 'Login', '');
+      return { token, username: user.username, displayName: user.displayName, position: user.position, photoUrl: user.photoUrl };
+    }
+    return apiPost('login', { username, password });
+  }
+
+  async function logout(token) {
+    if (CONFIG.DEMO_MODE) {
+      const username = demoTokens[token];
+      const user = demoUsers.find(u => u.username === username);
+      if (user) demoLog(user, 'Logout', '');
+      delete demoTokens[token];
+      return { ok: true };
+    }
+    return apiPost('logout', { token });
+  }
+
+  /** username is the CURRENTLY LOGGED IN user (from auth.js) — used to find their record in demo mode. */
+  async function changeOwnPassword(username, currentPassword, newPassword) {
+    if (CONFIG.DEMO_MODE) {
+      const user = demoUsers.find(u => u.username === username);
+      if (!user) throw new Error('User not found.');
+      if (user.password !== currentPassword) throw new Error('Your current password is incorrect.');
+      if (!newPassword || newPassword.trim().length < 4) throw new Error('New password must be at least 4 characters.');
+      user.password = newPassword;
+      demoLog(user, 'Change Password', 'Changed own password');
+      return { ok: true };
+    }
+    return apiPost('changeOwnPassword', { currentPassword, newPassword });
+  }
+
+  /** President-only. actingUsername is who's currently logged in (from auth.js). */
+  async function resetUserPassword(actingUsername, targetUsername, newPassword) {
+    if (CONFIG.DEMO_MODE) {
+      const actingUser = demoUsers.find(u => u.username === actingUsername);
+      if (!actingUser || actingUser.position !== 'President') throw new Error('Only the President account can do this.');
+      const target = demoUsers.find(u => u.username === targetUsername);
+      if (!target) throw new Error('User not found: ' + targetUsername);
+      if (!newPassword || newPassword.trim().length < 4) throw new Error('New password must be at least 4 characters.');
+      target.password = newPassword;
+      demoLog(actingUser, 'Reset Password', 'Reset password for ' + targetUsername);
+      return { ok: true };
+    }
+    return apiPost('resetUserPassword', { username: targetUsername, newPassword });
+  }
+
+  /** Self-service: updates the CALLER's own displayName/photoUrl only. */
+  async function updateUserProfile(username, displayName, photoUrl) {
+    if (CONFIG.DEMO_MODE) {
+      const user = demoUsers.find(u => u.username === username);
+      if (!user) throw new Error('User not found.');
+      if (displayName && displayName.trim()) user.displayName = displayName.trim();
+      if (typeof photoUrl === 'string') user.photoUrl = photoUrl.trim();
+      demoLog(user, 'Update Profile', 'Updated own profile');
+      return demoUsers.map(u => ({ username: u.username, displayName: u.displayName, position: u.position, photoUrl: u.photoUrl }));
+    }
+    return apiPost('updateUserProfile', { displayName, photoUrl });
+  }
+
+  /** Most recent first, capped at 500 rows — same shape in demo mode and real mode. */
+  async function getActivityLog() {
+    if (CONFIG.DEMO_MODE) {
+      return [...demoActivityLog].reverse().slice(0, 500);
+    }
+    return apiGet('getActivityLog', { token: (typeof getAdminToken === 'function') ? getAdminToken() : '' });
   }
 
   return {
     fetchMembers, addMember, updateMember, deleteMember,
     fetchAttendance, saveAttendance,
     fetchFees, saveFees,
+    listArchivedYears, startNewYear,
     fetchSettings, saveSettings,
-    adminLogin, adminLogout, changeAdminPassword, startNewYear,
+    getUsersPublic, login, logout, changeOwnPassword, resetUserPassword, updateUserProfile, getActivityLog,
     MONTHS
   };
 })();

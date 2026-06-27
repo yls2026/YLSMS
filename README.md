@@ -2,21 +2,23 @@
 
 A complete, free-to-run admin dashboard for managing a Youth Lions Society — members, attendance, membership fees, birthdays, and reports. Built with plain HTML5, CSS3 and JavaScript (Bootstrap 5) on the frontend, and Google Apps Script + Google Sheets as a free backend/database. Designed to be hosted on GitHub Pages at no cost.
 
-There are two access levels: anyone can **view** members, attendance, fees and birthdays without logging in, while a single shared **Admin password** is required to add, edit, delete, or mark anything.
+There are two access levels: anyone can **view** members, attendance, fees and birthdays without logging in, while logging in as one of **6 committee accounts** (President, Vice President, Secretary, Assistant Secretary, Treasurer, Media & PR Officer) is required to add, edit, delete, or mark anything — every change is recorded in an Activity Log.
 
 ---
 
 ## 1. Features
 
 - Responsive dashboard with summary cards (total/male/female members, upcoming birthdays, attendance rate, fee collection rate)
-- **Public view / Admin edit:** anyone can browse members, member numbers, attendance and fee records, and birthdays without logging in. Adding, editing, deleting, or marking attendance/fees requires logging in as Admin (see §4a below).
+- **Public view / Committee edit:** anyone can browse members, member numbers, attendance and fee records, and birthdays without logging in. Adding, editing, deleting, or marking attendance/fees requires logging in as one of 6 committee accounts (see §4a below).
+- **Year archiving & browsing:** Attendance and Fees have a `< 2026 >` style year switcher — click "Start New Year" on Settings to archive the current year and start the next one blank; flip back to any past year to view it (read-only).
+- **Activity Log:** every login, logout, and change (add/edit/delete member, mark attendance/fee, settings change, password reset, etc.) is recorded with who/when/what — viewable and exportable from Reports → Activity Log.
 - Members module: add/edit/delete, auto-generated `YLS/YYYY/001` IDs, search, filter, sort, pagination
 - **Configurable phone country codes:** the Add/Edit Member form has a country-code dropdown (defaults to 🇱🇰 +94 Sri Lanka) instead of a fixed prefix — add or remove countries in `assets/js/countryCodes.js`
 - Attendance register: a Jan–Dec checkbox grid per member with instant auto-save
 - Membership fees tracker: a Jan–Dec Paid/Pending dropdown grid per member with instant auto-save and monthly statistics
 - Birthday tracking with automatic age calculation and "today's birthday" highlighting
 - Reports module: Member, Attendance, Fee Collection and Birthday reports, each exportable as PDF, Excel, or CSV
-- Settings page for organization name, WhatsApp group link, fee amount, system theme, and the Admin password (Admin-only)
+- Settings page for organization name, WhatsApp group link, fee amount, system theme, your own profile/password (My Profile), and — President only — resetting another committee account's password (Manage Committee Accounts)
 - Works fully in **demo mode** out of the box (sample data, no backend needed) so you can preview every screen immediately
 
 ---
@@ -64,16 +66,44 @@ To go live with your own data, follow the steps below.
 
 ---
 
-## 4a. Admin Login & Public View
+## 4a. Committee Login & Public View
 
-YLSMS has no per-person user accounts — there's a single shared **Admin password** for the whole club.
+YLSMS has 6 permanent login accounts — one per committee position, **not** one per person:
+
+| Username | Position | Default display name |
+|---|---|---|
+| `president` | President | Lahiru Sampath |
+| `vice_president` | Vice President | Nipuna Sanjeewa |
+| `secretary` | Secretary | Chandima Ishan |
+| `assistant_secretary` | Assistant Secretary | Milan Jeewantha |
+| `treasurer` | Treasurer | Gothama Nandeera |
+| `media_pr` | Media & Public Relations Officer | Kasun Harshana |
+
+The **username always represents the position**, never the person — because office-holders change every year or two. When someone new takes over a position:
+1. They log in with that position's existing username + password (ask the outgoing officer or the President for it).
+2. They go to **Settings → My Profile** and update the Display Name (and optionally a Photo URL) to themselves — the username and position never change.
+3. They go to **Settings → Change My Password** to set a password only they know.
+
+If they don't know the current password, the **President** can reset it for them from **Settings → Manage Committee Accounts** (President-only).
 
 - **Anyone** who opens the site can view the Members list, member numbers, attendance records, fee records, and birthdays — no login needed.
-- To **add, edit, or delete** a member, mark attendance, mark fee status, or change Settings, you must tap **Admin Login** (top-right of the navbar, or the chip at the bottom of the sidebar) and enter the Admin password.
-- The default Admin password is **`admin123`**. **Change it immediately** after your first deployment: log in, go to **Settings → Change Admin Password**, and set a password only your club's admins know.
-- A login lasts for the current browser session (about 6 hours, or until you close the tab/browser or tap **Logout**). Everyone needs to log in again after that.
-- In **demo mode** (no backend connected yet), the login uses the fixed demo password `admin123` shown right on the login form — this is for previewing the UI only and never touches real data.
-- Even if someone tampered with the page's JavaScript in their browser, the Apps Script backend independently re-checks the Admin session token on every add/edit/delete/mark request, so guest visitors can't write data no matter what they do in the browser.
+- To **add, edit, or delete** a member, mark attendance, mark fee status, change Settings, or start a new year, you must log in as one of the 6 accounts (top-right of the navbar, or the chip at the bottom of the sidebar — pick your name, enter your password).
+- Every account's default password is **`changeme123`**. **Change it immediately** after your first deployment (Settings → Change My Password).
+- A login lasts for the current browser session (about 6 hours, or until you close the tab/browser or tap **Logout**).
+- In **demo mode** (no backend connected yet), every account uses the fixed demo password `changeme123` shown right on the login form — this is for previewing the UI only and never touches real data.
+- Even if someone tampered with the page's JavaScript in their browser, the Apps Script backend independently re-checks the session token on every write request, so guest visitors can't write data no matter what they do in the browser.
+- Passwords are never stored in plain text — they're salted and SHA-256 hashed in the `Users` sheet.
+- Every login, logout, and change is recorded in the `ActivityLog` sheet (who, when, what) — viewable and exportable from **Reports → Activity Log**.
+
+---
+
+## 4b. Year Archiving (Attendance & Fees)
+
+Attendance and Fees don't have a year column — the Jan-Dec columns always mean "the current year". The `< 2026 >` arrows above the Attendance/Fees tables let you browse past years once they exist:
+
+1. When a year ends, go to **Settings → Start New Year**, confirm the year to archive, and submit.
+2. This copies the live `Attendance`/`Fees` sheets to `Attendance 2026`/`Fees 2026` (read-only archives) and clears Jan-Dec back to blank on the live sheets — member records are never touched.
+3. The `< >` arrows on the Attendance/Fees pages now let everyone flip back to 2026 (view-only) or forward to the live year (editable, if logged in).
 
 ---
 
@@ -171,11 +201,11 @@ Each page under `/pages/` loads `components/sidebar.html` and `components/navbar
 **I want to change the color theme.**
 Go to **Settings → System Theme** for the three built-in options, or edit the CSS variables at the top of `assets/css/style.css` for full custom control.
 
-**"Unauthorized. Please log in as Admin" when saving.**
-Your login session expired (sessions last ~6 hours) or you're not logged in yet — tap **Admin Login** in the navbar/sidebar and enter the Admin password again.
+**"Unauthorized. Please log in to make changes" when saving.**
+Your login session expired (sessions last ~6 hours) or you're not logged in yet — click **Log In** in the navbar/sidebar, pick your name, and enter your password again.
 
-**I forgot the Admin password.**
-Open your Google Sheet directly, go to the `Settings` tab, find the row with `adminPassword` in column A, and edit the value in column B — that's the live password, no redeploy needed.
+**I forgot my password / a former officer's account is locked.**
+Log in as the **President** account, go to **Settings → Manage Committee Accounts**, pick the account, and reset its password. If even the President's password is lost, open your Google Sheet directly, go to the `Users` tab, and delete that account's row entirely — the next page load auto-recreates any missing default account with the original default password (`changeme123`), which you can then change normally.
 
 **I want to add/remove a country in the phone dropdown.**
 Edit the `COUNTRY_CODES` array at the top of `assets/js/countryCodes.js` — every dropdown and the phone-parsing logic for editing existing members reads from that single list.
@@ -184,10 +214,11 @@ Edit the `COUNTRY_CODES` array at the top of `assets/js/countryCodes.js` — eve
 
 ## 11a. Security Note
 
-This password gate is designed for a small club's honor-system needs, not bank-grade security: the Admin password is shared by everyone who manages the club, and the Apps Script web app is reachable by anyone on the internet. For better protection:
-- Pick a password that isn't easily guessed, and change it if a former admin no longer needs access.
-- Treat the Google Sheet itself as the source of truth — only share *edit* access to it with people you trust, since anyone with sheet access can read or change the Admin password directly.
-- This system does not encrypt data in transit beyond standard HTTPS, and does not log who performed which write — it only checks *whether* the caller knows the current password.
+This password gate is designed for a small club's honor-system needs, not bank-grade security: 6 shared committee accounts manage the club, and the Apps Script web app is reachable by anyone on the internet. For better protection:
+- Pick passwords that aren't easily guessed, and have the President reset an account's password whenever its holder's term ends.
+- Treat the Google Sheet itself as the source of truth — only share *edit* access to it with people you trust, since anyone with sheet access can read the `Users` tab's password hashes (though not recover the actual passwords from them) or read the full `ActivityLog`.
+- Passwords are salted + SHA-256 hashed before being stored — never in plain text — but this still isn't audited, professional-grade cryptography; don't reuse a sensitive password here.
+- This system does not encrypt data in transit beyond standard HTTPS. Every write is attributed to a specific committee account in the Activity Log, but since accounts are shared by position (not by person), the log identifies *which position* made a change, not necessarily *which individual* was logged in at the time.
 
 ---
 

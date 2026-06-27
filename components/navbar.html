@@ -10,8 +10,8 @@
 
   <div class="topnav-actions">
     <span class="topnav-date" id="navCurrentDate"></span>
-    <button type="button" class="btn btn-sm btn-outline-primary js-auth-login-btn" title="Log in as Admin">
-      <i class="bi bi-shield-lock-fill me-1"></i>Admin Login
+    <button type="button" class="btn btn-sm btn-outline-primary js-auth-login-btn" title="Log In">
+      <i class="bi bi-box-arrow-in-right me-1"></i>Log In
     </button>
     <button type="button" class="btn btn-sm btn-outline-secondary d-none js-auth-logout-btn" title="Log out">
       <i class="bi bi-box-arrow-right me-1"></i>Logout
@@ -20,23 +20,31 @@
   </div>
 </nav>
 
-<!-- Admin Login Modal (shared across every page) -->
+<!-- Login Modal (shared across every page) -->
 <div class="modal fade" id="adminLoginModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-shield-lock-fill me-2"></i>Admin Login</h5>
+        <h5 class="modal-title"><i class="bi bi-shield-lock-fill me-2"></i>Committee Login</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form id="adminLoginForm">
         <div class="modal-body">
           <div id="adminLoginAlert"></div>
-          <p class="text-muted small">Everyone can view members, attendance, fees and birthdays. Logging in as Admin lets you add, edit and mark records.</p>
+          <p class="text-muted small">Everyone can view members, attendance, fees and birthdays. Logging in lets you add, edit and mark records — and is recorded in the Activity Log.</p>
           <div id="adminLoginDemoHint" class="alert alert-warning small d-none">
-            Demo mode — use password <strong>admin123</strong>.
+            Demo mode — every account's password is <strong>changeme123</strong>.
           </div>
-          <label class="form-label" for="adminLoginPassword">Admin Password</label>
-          <input type="password" class="form-control" id="adminLoginPassword" required autocomplete="current-password" placeholder="••••••••">
+          <div class="mb-3">
+            <label class="form-label" for="adminLoginUser">Who are you?</label>
+            <select class="form-select" id="adminLoginUser" required>
+              <option value="">Loading…</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" for="adminLoginPassword">Password</label>
+            <input type="password" class="form-control" id="adminLoginPassword" required autocomplete="current-password" placeholder="••••••••">
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Cancel</button>

@@ -3,16 +3,27 @@
  */
 
 let attendanceRows = [];
+let attendanceAvailableYears = [];
+let attendanceViewYear = new Date().getFullYear();
 
 onLayoutReady(initAttendancePage);
 
 async function initAttendancePage() {
   document.getElementById('pageTitle').textContent = 'Attendance';
-  document.getElementById('attendanceYearPill').textContent = new Date().getFullYear();
 
   document.getElementById('attendanceSearch').addEventListener('input', debounce(renderAttendanceTable, 200));
   document.getElementById('btnExportAttendance').addEventListener('click', exportAttendanceCsv);
+  document.getElementById('attendanceYearPrev').addEventListener('click', () => stepAttendanceYear(-1));
+  document.getElementById('attendanceYearNext').addEventListener('click', () => stepAttendanceYear(1));
 
+  try {
+    attendanceAvailableYears = await Api.listArchivedYears();
+  } catch (err) {
+    attendanceAvailableYears = [attendanceViewYear];
+  }
+  if (!attendanceAvailableYears.includes(attendanceViewYear)) attendanceAvailableYears.push(attendanceViewYear);
+
+  updateAttendanceYearControls();
   await loadAttendance();
 }
 
@@ -20,22 +31,52 @@ window.addEventListener('ylsms:authchanged', () => {
   if (document.getElementById('attendanceBody')) renderAttendanceTable();
 });
 
+function isLiveAttendanceYear() {
+  return attendanceViewYear === new Date().getFullYear();
+}
+
+function updateAttendanceYearControls() {
+  document.getElementById('attendanceYearPill').textContent = attendanceViewYear;
+  const idx = attendanceAvailableYears.indexOf(attendanceViewYear);
+  document.getElementById('attendanceYearPrev').disabled = idx <= 0;
+  document.getElementById('attendanceYearNext').disabled = idx === -1 || idx >= attendanceAvailableYears.length - 1;
+  document.getElementById('attendanceArchiveBanner').classList.toggle('d-none', isLiveAttendanceYear());
+}
+
+async function stepAttendanceYear(direction) {
+  const idx = attendanceAvailableYears.indexOf(attendanceViewYear);
+  const nextIdx = idx + direction;
+  if (nextIdx < 0 || nextIdx >= attendanceAvailableYears.length) return;
+  attendanceViewYear = attendanceAvailableYears[nextIdx];
+  updateAttendanceYearControls();
+  await loadAttendance();
+}
+
 async function loadAttendance() {
   try {
-    attendanceRows = await Api.fetchAttendance();
+    attendanceRows = isLiveAttendanceYear()
+      ? await Api.fetchAttendance()
+      : await Api.fetchAttendance(attendanceViewYear);
     renderAttendanceTable();
   } catch (err) {
     showAlert(document.getElementById('attendanceAlert'), 'Could not load attendance: ' + err.message);
   }
 }
 
-/** Index (0 = Jan … 11 = Dec) of the current real-world month. */
-function currentMonthIndex() {
-  return new Date().getMonth();
-}
+/**
+ * An Attendance cell has 3 possible states:
+ * - "Present" → explicitly marked present (✅ green)
+ * - "Absent"  → explicitly marked absent (❎ red)
+ * - ""/blank  → no value yet (white "Empty" — also forced for any month
+ *               that hasn't happened yet, for the live year)
+ * Accepts legacy boolean TRUE/FALSE values from older sheet rows too.
+ * (attendanceStatus/attendanceStatusClass live in utils.js — shared with
+ * dashboard.js and reports.js.)
+ */
 
-function isFutureMonth(monthAbbrev) {
-  return MONTHS_FULL.indexOf(monthAbbrev) > currentMonthIndex();
+/** Index (0 = Jan … 11 = Dec) of the last "real" month for the year being viewed. */
+function lastElapsedMonthIndex() {
+  return isLiveAttendanceYear() ? new Date().getMonth() : 11; // archived years are fully in the past
 }
 
 function renderAttendanceTable() {
@@ -43,7 +84,8 @@ function renderAttendanceTable() {
   const empty = document.getElementById('attendanceEmpty');
   const footer = document.getElementById('attendanceFooter');
   const q = document.getElementById('attendanceSearch').value.trim().toLowerCase();
-  const curMonth = currentMonthIndex();
+  const curMonth = lastElapsedMonthIndex();
+  const editable = isAdmin() && isLiveAttendanceYear();
 
   const rows = attendanceRows.filter(r =>
     !q || String(r.ID).toLowerCase().includes(q) || String(r.Name).toLowerCase().includes(q)
@@ -64,14 +106,13 @@ function renderAttendanceTable() {
 
     const monthCells = MONTHS_FULL.map((m, idx) => {
       if (idx > curMonth) {
-        // Upcoming month — always shown blank and locked, regardless of
-        // any leftover value, since attendance can't be taken yet.
+        // Upcoming month (only possible on the live year) — always blank and locked.
         return `<td class="text-center attendance-future-cell" title="Upcoming month">—</td>`;
       }
       const status = attendanceStatus(r[m]);
       return `
         <td class="text-center">
-          <select class="attendance-select ${attendanceStatusClass(status)}" data-prev="${status === 'Empty' ? '' : status}" ${isAdmin() ? '' : 'disabled'}
+          <select class="attendance-select ${attendanceStatusClass(status)}" data-prev="${status === 'Empty' ? '' : status}" ${editable ? '' : 'disabled'}
             onchange="toggleAttendance('${escapeHtml(r.ID)}', '${m}', this.value, this)">
             <option value="Present" ${status === 'Present' ? 'selected' : ''}>✅ Present</option>
             <option value="Absent" ${status === 'Absent' ? 'selected' : ''}>❎ Absent</option>
@@ -95,7 +136,8 @@ function renderAttendanceTable() {
 /**
  * Month-end summary footer: for every month that has already happened,
  * shows how many of the (currently filtered) members were marked Present
- * and what percentage of the group that is. Upcoming months show "—".
+ * and what percentage of the group that is. Upcoming months (live year
+ * only) show "—".
  */
 function renderAttendanceFooter(rows, curMonth) {
   const footer = document.getElementById('attendanceFooter');
@@ -129,9 +171,9 @@ function renderAttendanceFooter(rows, curMonth) {
 
 async function toggleAttendance(id, month, value, selectEl) {
   const previousValue = selectEl.dataset.prev || '';
-  if (!isAdmin()) {
+  if (!isAdmin() || !isLiveAttendanceYear()) {
     selectEl.value = previousValue;
-    showToast('Please log in as Admin to mark attendance.', 'warning');
+    showToast(isLiveAttendanceYear() ? 'Please log in to mark attendance.' : 'Archived years are read-only.', 'warning');
     return;
   }
   const statusEl = document.getElementById('attendanceSaveStatus');
@@ -157,7 +199,7 @@ async function toggleAttendance(id, month, value, selectEl) {
 }
 
 function exportAttendanceCsv() {
-  const curMonth = currentMonthIndex();
+  const curMonth = lastElapsedMonthIndex();
   const elapsedMonths = MONTHS_FULL.slice(0, curMonth + 1);
   const header = ['ID', 'Name', ...MONTHS_FULL, 'Rate %'];
   const rows = attendanceRows.map(r => {
@@ -167,6 +209,6 @@ function exportAttendanceCsv() {
     return [r.ID, r.Name, ...monthValues, rate];
   });
   const csv = arrayToCsv([header, ...rows]);
-  downloadBlob(csv, `attendance-${new Date().getFullYear()}.csv`, 'text/csv');
+  downloadBlob(csv, `attendance-${attendanceViewYear}.csv`, 'text/csv');
   showToast('Attendance report exported.', 'success');
 }

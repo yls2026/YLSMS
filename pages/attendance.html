@@ -26,9 +26,17 @@
       <div class="section-heading">
         <h2><i class="bi bi-calendar2-check-fill me-2 text-success"></i>Attendance Register</h2>
         <div class="d-flex gap-2">
-          <span class="pill pill-gold align-self-center" id="attendanceYearPill"></span>
+          <div class="year-nav">
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="attendanceYearPrev" title="Previous year"><i class="bi bi-chevron-left"></i></button>
+            <span class="pill pill-gold align-self-center year-nav-label" id="attendanceYearPill"></span>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="attendanceYearNext" title="Next year"><i class="bi bi-chevron-right"></i></button>
+          </div>
           <button class="btn btn-outline-primary btn-sm" id="btnExportAttendance"><i class="bi bi-download me-1"></i>Export CSV</button>
         </div>
+      </div>
+
+      <div id="attendanceArchiveBanner" class="guest-banner d-none">
+        <i class="bi bi-archive-fill me-1"></i>Viewing an archived year — read only.
       </div>
 
       <div class="row g-2 mb-3">

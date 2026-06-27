@@ -73,14 +73,40 @@
           <hr class="my-4 admin-only d-none">
 
           <div class="admin-only d-none">
-            <h5 class="mb-3"><i class="bi bi-key-fill me-2 text-secondary"></i>Change Admin Password</h5>
+            <h5 class="mb-2"><i class="bi bi-person-circle me-2 text-secondary"></i>My Profile</h5>
+            <p class="text-muted small mb-3">
+              Update your own display name and photo — handy when a new officer takes over this position.
+              Your username and position never change here; only the President can reset your password if you forget it.
+            </p>
+            <div id="profileAlert"></div>
+            <form id="profileForm" class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label" for="profileDisplayName">Display Name</label>
+                <input type="text" class="form-control" id="profileDisplayName" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="profilePhotoUrl">Photo URL <span class="text-muted">(optional)</span></label>
+                <input type="url" class="form-control" id="profilePhotoUrl" placeholder="https://...">
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-outline-primary" id="btnSaveProfile">
+                  <i class="bi bi-save-fill me-1"></i>Save Profile
+                </button>
+              </div>
+            </form>
+
+            <h5 class="mb-3"><i class="bi bi-key-fill me-2 text-secondary"></i>Change My Password</h5>
             <div id="passwordAlert"></div>
             <form id="changePasswordForm" class="row g-3">
-              <div class="col-md-6">
+              <div class="col-md-4">
+                <label class="form-label" for="currentPassword">Current Password</label>
+                <input type="password" class="form-control" id="currentPassword" required autocomplete="current-password">
+              </div>
+              <div class="col-md-4">
                 <label class="form-label" for="newAdminPassword">New Password</label>
                 <input type="password" class="form-control" id="newAdminPassword" minlength="4" required autocomplete="new-password">
               </div>
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <label class="form-label" for="confirmAdminPassword">Confirm New Password</label>
                 <input type="password" class="form-control" id="confirmAdminPassword" minlength="4" required autocomplete="new-password">
               </div>
@@ -91,6 +117,39 @@
                 <span class="form-text d-block mt-2" id="demoPasswordHint"></span>
               </div>
             </form>
+          </div>
+
+          <hr class="my-4 president-only d-none">
+
+          <div class="president-only d-none">
+            <h5 class="mb-2"><i class="bi bi-people-fill me-2 text-secondary"></i>Manage Committee Accounts</h5>
+            <p class="text-muted small mb-3">
+              President-only. Reset another account's password — e.g. when a new officer takes over a position
+              and doesn't know the previous password yet. They can update their own name/photo above (My Profile)
+              once they've logged in.
+            </p>
+            <div id="manageUsersAlert"></div>
+            <form id="resetPasswordForm" class="row g-3 align-items-end mb-3">
+              <div class="col-md-5">
+                <label class="form-label" for="resetUsername">Account</label>
+                <select class="form-select" id="resetUsername"></select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label" for="resetNewPassword">New Password</label>
+                <input type="password" class="form-control" id="resetNewPassword" minlength="4" required>
+              </div>
+              <div class="col-md-3">
+                <button type="submit" class="btn btn-outline-danger w-100" id="btnResetPassword">
+                  <i class="bi bi-key-fill me-1"></i>Reset Password
+                </button>
+              </div>
+            </form>
+            <div class="table-responsive">
+              <table class="table table-sm align-middle">
+                <thead><tr><th>Account</th><th>Display Name</th><th>Position</th></tr></thead>
+                <tbody id="usersTableBody"></tbody>
+              </table>
+            </div>
           </div>
 
           <hr class="my-4 admin-only d-none">
